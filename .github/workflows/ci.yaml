@@ -65,8 +65,8 @@ jobs:
           name: docker-artifact
       - name: Show workspace
         run: ls -la
-      - name: Show docker-artifact contents
-        run: ls -la docker-artifact
+      # - name: Show docker-artifact contents
+      #   run: ls -la docker-artifact
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
 
