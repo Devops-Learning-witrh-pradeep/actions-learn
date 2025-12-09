@@ -73,8 +73,7 @@ jobs:
       - name: Build (and optionally push) Docker image
         uses: docker/build-push-action@v4
         with:
-          context: docker-artifact
-          file: docker-artifact/Dockerfile
+          file: Dockerfile
           push: false
           tags: my-app:latest
       
