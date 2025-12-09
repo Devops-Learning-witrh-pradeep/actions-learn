@@ -18,7 +18,7 @@ jobs:
       - name: run tests
         run: npm test
       - name: upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with: 
           name: website
           path: dist/
