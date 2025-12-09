@@ -76,6 +76,9 @@ jobs:
           file: Dockerfile
           push: false
           tags: my-app:latest
+
+      - name: Show Docker images
+        run: docker images
       
             
     
