@@ -80,6 +80,18 @@ jobs:
 
       - name: Save image name
         run: echo "IMAGE=ghcr.io/${{ github.repository_owner }}/git-course-site:${{ github.sha }}" >> $GITHUB_ENV
+
+  build-image: 
+    runs-on: ubuntu-latest
+    steps: 
+      - name: download Artifacts
+        uses: actions/download-artifact@v4
+        with: 
+          name: docker-artifact
+      - name: build docker image
+        run: |
+          ls 
+          docker build -t my-app:latest .
       
             
     
