@@ -14,7 +14,7 @@ jobs:
       - name: npm install
         run: npm install
       - name: build the code
-        run: npm build
+        run: npm run build
       - name: run tests
         run: npm test
       - name: upload artifact
