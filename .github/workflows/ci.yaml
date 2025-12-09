@@ -8,6 +8,7 @@ jobs:
         uses: actions/setup-node@v4
         with: 
           node-version: '18'
+      - run: echo "pipeline is triggered with ${{ github.event_name }} event"
       - name: Checkout code
         uses: actions/checkout@v3  
       - name: npm install
@@ -19,7 +20,7 @@ jobs:
       - name: upload artifact
         uses: actions/upload-artifact@v3
         with: 
-          name: wbsite
+          name: website
           path: dist/
       
             
