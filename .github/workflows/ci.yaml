@@ -6,3 +6,9 @@ jobs:
     steps: 
       - name: say hello
         run: echo "Hello, World!"
+
+  Test: 
+    runs-on: windows-latest
+    steps: 
+      - name: say hello from windows server
+        run: echo "Hello, World from Windows Server!"
