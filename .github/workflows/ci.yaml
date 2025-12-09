@@ -37,7 +37,9 @@ jobs:
           npm ci --omit=dev
           npm run build
           # Copy needed runtime files into docker-artifact
-          cp -r server.js package*.json dist node_modules docker-artifact/
+          cp -r server.js package*.json package-lock.json dist node_modules docker-artifact/
+          # Also include the Dockerfile inside the artifact so the build can use a simple context
+          cp Dockerfile docker-artifact/Dockerfile
 
       - name: Upload website artifact
         uses: actions/upload-artifact@v4
@@ -61,12 +63,20 @@ jobs:
         uses: actions/download-artifact@v4
         with: 
           name: docker-artifact
-      - name: build docker image
-        run: |
-          ls 
-          cd dist
-          ls
-          docker build -t my-app:latest .
+      - name: Show workspace
+        run: ls -la
+      - name: Show docker-artifact contents
+        run: ls -la docker-artifact
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build (and optionally push) Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: docker-artifact
+          file: docker-artifact/Dockerfile
+          push: false
+          tags: my-app:latest
       
             
     

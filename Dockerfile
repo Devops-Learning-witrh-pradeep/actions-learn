@@ -6,8 +6,9 @@
 FROM node:18-alpine
 WORKDIR /usr/src/app
 
-# Copy produced artifact into the image (pre-built in CI)
-COPY docker-artifact/ .
+# Copy produced artifact into the image (pre-built in CI). When the build uses `docker-artifact` context,
+# this will copy all files from the artifact into the image root
+COPY . .
 
 EXPOSE 3000
 CMD ["node", "server.js"]
