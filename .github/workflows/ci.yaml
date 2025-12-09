@@ -51,7 +51,6 @@ jobs:
           name: docker-artifact
           path: docker-artifact/
 
-
   build-image: 
     needs: build-test
     runs-on: ubuntu-latest
@@ -63,6 +62,8 @@ jobs:
       - name: build docker image
         run: |
           ls 
+          cd dist
+          ls
           docker build -t my-app:latest .
       
             
