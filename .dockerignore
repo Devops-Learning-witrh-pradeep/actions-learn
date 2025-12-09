@@ -1,4 +1,7 @@
+# Do not copy top-level node_modules into the image (keep the common pattern)
 node_modules
+!docker-artifact/node_modules
+!docker-artifact/dist
 npm-debug.log
 dist
 .git
