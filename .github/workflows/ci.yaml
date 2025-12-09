@@ -1,27 +1,55 @@
-name: build code
-on: workflow_dispatch
-jobs: 
-  Build: 
+name: Node CI and Artifacts
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch: {}
+
+jobs:
+  build-test:
     runs-on: ubuntu-latest
-    steps: 
-      - name: install nodejs
-        uses: actions/setup-node@v4
-        with: 
-          node-version: '18'
-      - run: echo "pipeline is triggered with ${{ github.event_name }} event"
+    name: Build & Test and Prepare Artifacts
+    steps:
       - name: Checkout code
-        uses: actions/checkout@v3  
-      - name: npm install
-        run: npm install
-      - name: build the code
-        run: npm run build
-      - name: run tests
+        uses: actions/checkout@v3
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies (dev)
+        run: npm ci
+
+      - name: Run tests
         run: npm test
-      - name: upload artifact
+
+      - name: Build static files
+        run: npm run build
+
+      - name: Prepare docker-artifact (production runtime)
+        run: |
+          mkdir -p docker-artifact
+          # Ensure production modules only (remove dev deps and reinstall)
+          rm -rf node_modules
+          npm ci --omit=dev
+          npm run build
+          # Copy needed runtime files into docker-artifact
+          cp -r server.js package*.json dist node_modules docker-artifact/
+
+      - name: Upload website artifact
         uses: actions/upload-artifact@v4
-        with: 
+        with:
           name: website
           path: dist/
+
+      - name: Upload docker artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-artifact
+          path: docker-artifact/
       
             
     
