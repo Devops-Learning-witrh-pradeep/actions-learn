@@ -78,15 +78,31 @@ jobs:
         run: |
           echo "--- docker-artifact/Dockerfile ---"
           Get-Content docker-artifact\Dockerfile -TotalCount 50
-      - name: Setup Docker Buildx
+      - name: Docker info (diagnostics)
+        run: |
+          echo "=== Docker CLI ==="
+          docker --version || echo "docker not found"
+          echo "=== Docker info (may fail if no daemon) ==="
+          docker info || echo "docker info failed (Daemon may not be running or permission denied)"
+
+      # On Linux runners we'll use buildx and optionally push using build-push-action; buildx requires Docker daemon and privileges.
+      - name: Setup Docker Buildx (Linux only)
+        if: runner.os != 'Windows'
         uses: docker/setup-buildx-action@v3
 
-      - name: Check Docker version
-        run: docker --version
+      - name: Build and push image (Linux / GHCR) - uses Buildx
+        if: runner.os != 'Windows' && env.GHCR_PAT != ''
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/git-course-site:${{ github.sha }}
 
-      - name: Build Docker image from docker-artifact
+      - name: Build Docker image from docker-artifact (Windows fallback)
+        if: runner.os == 'Windows'
         run: |
-          echo "Building image from docker-artifact/Dockerfile..."
+          echo "Building image from docker-artifact/Dockerfile (Windows) ..."
           docker build -f docker-artifact/Dockerfile -t app:latest docker-artifact
 
       - name: Show Docker images
