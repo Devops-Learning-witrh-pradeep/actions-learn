@@ -10,7 +10,7 @@ on:
 jobs:
   build-test:
     runs-on: self-hosted
-    default: 
+    defaults: 
       run: 
         working_directory: ${{ github.workspace }}
     name: Build & Test and Prepare Artifacts
