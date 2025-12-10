@@ -59,6 +59,10 @@ jobs:
           echo "actor is ${{ github.actor }}"
           echo "name is ${{ github.workflow }}"
           echo "run number is ${{ github.run_number }}"
+
+      - name: priniting the repo varaibles
+        run: |
+          echo "my name is ${{ MY_NAME }} comin gfrom repo varaibles"
         
       
 
