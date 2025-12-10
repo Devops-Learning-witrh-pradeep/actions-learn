@@ -74,6 +74,10 @@ jobs:
       - name: Ensure Dockerfile exists in docker-artifact
         run: |
           if (!(Test-Path docker-artifact\Dockerfile)) { Write-Error 'Dockerfile missing inside docker-artifact'; exit 1 }
+      - name: Show Dockerfile contents
+        run: |
+          echo "--- docker-artifact/Dockerfile ---"
+          Get-Content docker-artifact\Dockerfile -TotalCount 50
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
 
