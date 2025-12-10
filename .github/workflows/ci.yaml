@@ -52,102 +52,112 @@ jobs:
           name: docker-artifact
           path: docker-artifact/
 
-  build-image: 
-    needs: build-test
-    runs-on: [self-hosted, windows]
-    env:
-      INSTALL_DOCKER: ${{ github.event.inputs.install_docker || 'false' }}
-    steps: 
-            - name: Install Docker on Linux runner (optional)
-              if: env.INSTALL_DOCKER == 'true' && runner.os != 'Windows'
-              run: |
-                echo "Installing Docker on Linux runner..."
-                sudo apt-get update
-                sudo apt-get install -y ca-certificates curl gnupg lsb-release
-                curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-                echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-                sudo apt-get update
-                sudo apt-get install -y docker-ce docker-ce-cli containerd.io
-                sudo usermod -aG docker $USER || true
+      - name: priniting the contexts in github
+        run: |
+          echo "run id is ${{ github.run_id}}"
+          echo "sha is ${{ github.sha }}"
+          echo "actor is ${{ github.actor }}"
+          echo "name is ${{ github.workflow }}"
+          echo "run number is ${{ github.run_number }}"
+        
+      
 
-            - name: Install Docker on Windows runner (optional)
-              if: env.INSTALL_DOCKER == 'true' && runner.os == 'Windows'
-              shell: powershell
-              run: |
-                Write-Host "Attempting to install Docker on Windows runner..."
-                $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
-                if (-not $isAdmin) {
-                  Write-Host "Runner is NOT running with Administrator privileges; cannot install Docker. Set INSTALL_DOCKER to false or run the runner as admin."; exit 1
-                }
-                # Try to install Docker Desktop using Chocolatey (if available)
-                if (Get-Command choco -ErrorAction SilentlyContinue) {
-                  choco install docker-desktop --pre -y
-                } else {
-                  Write-Host "choco not found: attempting to install using PackageManagement (DockerMsftProvider) for Windows Server"
-                  Install-Module -Name DockerMsftProvider -Repository PSGallery -Force
-                  Install-Package -Name docker -ProviderName DockerMsftProvider -Force
-                }
-                # Start Docker
-                if (Get-Command "C:\Program Files\Docker\Docker\Docker Desktop.exe" -ErrorAction SilentlyContinue) {
-                  Start-Process "C:\Program Files\Docker\Docker\Docker Desktop.exe" -NoNewWindow -ErrorAction SilentlyContinue
-                  Start-Sleep -Seconds 10
-                }
-      # - name: Checkout code
-      #   uses: actions/checkout@v3
-      - name: Download docker-artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: docker-artifact
-          path: docker-artifact
-      - name: Show workspace
-        run: |
-          echo "Workspace files:"
-            # PowerShell friendly listing
-            Get-ChildItem -Force
-      - name: Show docker-artifact contents
-        run: |
-          echo "docker-artifact contents:"
-            if (Test-Path -Path "docker-artifact") {
-              Get-ChildItem -Path docker-artifact -Recurse -Force | Select-Object FullName, Length
-            } else {
-              Write-Host "docker-artifact not found in workspace"
-            }
-      - name: Ensure Dockerfile exists in docker-artifact
-        run: |
-          if (!(Test-Path docker-artifact\Dockerfile)) { Write-Error 'Dockerfile missing inside docker-artifact'; exit 1 }
-      - name: Show Dockerfile contents
-        run: |
-          echo "--- docker-artifact/Dockerfile ---"
-          Get-Content docker-artifact\Dockerfile -TotalCount 50
-      - name: Docker info (diagnostics)
-        run: |
-          echo "=== Docker CLI ==="
-          docker --version || echo "docker not found"
-          echo "=== Docker info (may fail if no daemon) ==="
-          docker info || echo "docker info failed (Daemon may not be running or permission denied)"
+  # build-image: 
+  #   needs: build-test
+  #   runs-on: [self-hosted, windows]
+  #   env:
+  #     INSTALL_DOCKER: ${{ github.event.inputs.install_docker || 'false' }}
+  #   steps: 
+  #           - name: Install Docker on Linux runner (optional)
+  #             if: env.INSTALL_DOCKER == 'true' && runner.os != 'Windows'
+  #             run: |
+  #               echo "Installing Docker on Linux runner..."
+  #               sudo apt-get update
+  #               sudo apt-get install -y ca-certificates curl gnupg lsb-release
+  #               curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+  #               echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+  #               sudo apt-get update
+  #               sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+  #               sudo usermod -aG docker $USER || true
 
-      # On Linux runners we'll use buildx and optionally push using build-push-action; buildx requires Docker daemon and privileges.
-      - name: Setup Docker Buildx (Linux only)
-        if: runner.os != 'Windows'
-        uses: docker/setup-buildx-action@v3
+  #           - name: Install Docker on Windows runner (optional)
+  #             if: env.INSTALL_DOCKER == 'true' && runner.os == 'Windows'
+  #             shell: powershell
+  #             run: |
+  #               Write-Host "Attempting to install Docker on Windows runner..."
+  #               $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
+  #               if (-not $isAdmin) {
+  #                 Write-Host "Runner is NOT running with Administrator privileges; cannot install Docker. Set INSTALL_DOCKER to false or run the runner as admin."; exit 1
+  #               }
+  #               # Try to install Docker Desktop using Chocolatey (if available)
+  #               if (Get-Command choco -ErrorAction SilentlyContinue) {
+  #                 choco install docker-desktop --pre -y
+  #               } else {
+  #                 Write-Host "choco not found: attempting to install using PackageManagement (DockerMsftProvider) for Windows Server"
+  #                 Install-Module -Name DockerMsftProvider -Repository PSGallery -Force
+  #                 Install-Package -Name docker -ProviderName DockerMsftProvider -Force
+  #               }
+  #               # Start Docker
+  #               if (Get-Command "C:\Program Files\Docker\Docker\Docker Desktop.exe" -ErrorAction SilentlyContinue) {
+  #                 Start-Process "C:\Program Files\Docker\Docker\Docker Desktop.exe" -NoNewWindow -ErrorAction SilentlyContinue
+  #                 Start-Sleep -Seconds 10
+  #               }
+  #     # - name: Checkout code
+  #     #   uses: actions/checkout@v3
+  #     - name: Download docker-artifact
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: docker-artifact
+  #         path: docker-artifact
+  #     - name: Show workspace
+  #       run: |
+  #         echo "Workspace files:"
+  #           # PowerShell friendly listing
+  #           Get-ChildItem -Force
+  #     - name: Show docker-artifact contents
+  #       run: |
+  #         echo "docker-artifact contents:"
+  #           if (Test-Path -Path "docker-artifact") {
+  #             Get-ChildItem -Path docker-artifact -Recurse -Force | Select-Object FullName, Length
+  #           } else {
+  #             Write-Host "docker-artifact not found in workspace"
+  #           }
+  #     - name: Ensure Dockerfile exists in docker-artifact
+  #       run: |
+  #         if (!(Test-Path docker-artifact\Dockerfile)) { Write-Error 'Dockerfile missing inside docker-artifact'; exit 1 }
+  #     - name: Show Dockerfile contents
+  #       run: |
+  #         echo "--- docker-artifact/Dockerfile ---"
+  #         Get-Content docker-artifact\Dockerfile -TotalCount 50
+  #     - name: Docker info (diagnostics)
+  #       run: |
+  #         echo "=== Docker CLI ==="
+  #         docker --version || echo "docker not found"
+  #         echo "=== Docker info (may fail if no daemon) ==="
+  #         docker info || echo "docker info failed (Daemon may not be running or permission denied)"
 
-      - name: Build and push image (Linux / GHCR) - uses Buildx
-        if: runner.os != 'Windows' && env.GHCR_PAT != ''
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          file: Dockerfile
-          push: true
-          tags: ghcr.io/${{ github.repository_owner }}/git-course-site:${{ github.sha }}
+  #     # On Linux runners we'll use buildx and optionally push using build-push-action; buildx requires Docker daemon and privileges.
+  #     - name: Setup Docker Buildx (Linux only)
+  #       if: runner.os != 'Windows'
+  #       uses: docker/setup-buildx-action@v3
 
-      - name: Build Docker image from docker-artifact (Windows fallback)
-        if: runner.os == 'Windows'
-        run: |
-          echo "Building image from docker-artifact/Dockerfile (Windows) ..."
-          docker build -f docker-artifact/Dockerfile -t app:latest docker-artifact
+  #     - name: Build and push image (Linux / GHCR) - uses Buildx
+  #       if: runner.os != 'Windows' && env.GHCR_PAT != ''
+  #       uses: docker/build-push-action@v4
+  #       with:
+  #         context: .
+  #         file: Dockerfile
+  #         push: true
+  #         tags: ghcr.io/${{ github.repository_owner }}/git-course-site:${{ github.sha }}
 
-      - name: Show Docker images
-        run: docker images
+  #     - name: Build Docker image from docker-artifact (Windows fallback)
+  #       if: runner.os == 'Windows'
+  #       run: |
+  #         echo "Building image from docker-artifact/Dockerfile (Windows) ..."
+  #         docker build -f docker-artifact/Dockerfile -t app:latest docker-artifact
+
+  #     - name: Show Docker images
+  #       run: docker images
       
             
     
