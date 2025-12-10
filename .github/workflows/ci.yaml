@@ -60,9 +60,19 @@ jobs:
           echo "name is ${{ github.workflow }}"
           echo "run number is ${{ github.run_number }}"
 
-      - name: priniting the repo varaibles
+      - name: Print repository variables
+        env:
+          MY_NAME: ${{ github.repository_owner }}
         run: |
-          echo "my name is ${{ MY_NAME }} comin gfrom repo varaibles"
+          echo "Repository: ${{ github.repository }}"
+          echo "Repository owner: ${{ github.repository_owner }}"
+          echo "Repository name: ${{ github.event.repository.name }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "SHA: ${{ github.sha }}"
+          echo "Actor: ${{ github.actor }}"
+          echo "Workflow: ${{ github.workflow }}"
+          echo "Run number: ${{ github.run_number }}"
+          echo "MY_NAME (env var): $MY_NAME"
         
       
 
