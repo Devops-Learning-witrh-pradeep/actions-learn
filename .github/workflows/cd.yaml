@@ -1,7 +1,13 @@
 name: testing the workflow
 on: 
-  - workflow_dispatch
-  - push
+  workflow_dispatch: 
+    inputs: 
+      DEBUG: 
+        description: enter if you want debug info
+        required: false
+        default: 'false'
+        type: boolean
+
 jobs: 
   Build: 
     runs-on: ubuntu-latest
