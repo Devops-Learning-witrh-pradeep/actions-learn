@@ -61,7 +61,7 @@ jobs:
       - name: Show workspace
         run: |
           echo "Workspace files:"
-          ls -la
+          dir
       - name: Show docker-artifact contents
         run: |
           echo "docker-artifact contents:"
