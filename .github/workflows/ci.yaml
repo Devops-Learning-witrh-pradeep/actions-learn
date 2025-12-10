@@ -9,7 +9,7 @@ on:
 
 jobs:
   build-test:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     name: Build & Test and Prepare Artifacts
     steps:
       - name: Checkout code
