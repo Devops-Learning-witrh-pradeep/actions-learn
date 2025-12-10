@@ -11,7 +11,8 @@ on:
         description: 'Install Docker on the runner before building images (true/false)'
         required: false
         default: 'false'
-
+env: 
+  MY_NAME: workflow
 jobs:
   build-test:
     runs-on: self-hosted
@@ -19,6 +20,7 @@ jobs:
       REPOSITORY: ${{ github.repository }}
       REPOSITORY_OWNER: ${{ github.repository_owner }}
       REPOSITORY_NAME: ${{ github.event.repository.name }}
+      MY_NAME: job
     defaults:
       run:
         working-directory: ${{ github.workspace }}
@@ -77,6 +79,8 @@ jobs:
           echo "Workflow: ${{ github.workflow }}"
           echo "Run number: ${{ github.run_number }}"
           echo "MY_NAME (env var): ${{ vars.MY_NAME}}"
+          echo "env is ${{ runner.os }}"
+          echo "env i s${{ env.MY_NAME }}"
         
       
 
