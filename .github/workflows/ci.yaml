@@ -5,7 +5,12 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      install_docker:
+        description: 'Install Docker on the runner before building images (true/false)'
+        required: false
+        default: 'false'
 
 jobs:
   build-test:
@@ -50,7 +55,43 @@ jobs:
   build-image: 
     needs: build-test
     runs-on: [self-hosted, windows]
+    env:
+      INSTALL_DOCKER: ${{ github.event.inputs.install_docker || 'false' }}
     steps: 
+            - name: Install Docker on Linux runner (optional)
+              if: env.INSTALL_DOCKER == 'true' && runner.os != 'Windows'
+              run: |
+                echo "Installing Docker on Linux runner..."
+                sudo apt-get update
+                sudo apt-get install -y ca-certificates curl gnupg lsb-release
+                curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+                echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+                sudo apt-get update
+                sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+                sudo usermod -aG docker $USER || true
+
+            - name: Install Docker on Windows runner (optional)
+              if: env.INSTALL_DOCKER == 'true' && runner.os == 'Windows'
+              shell: powershell
+              run: |
+                Write-Host "Attempting to install Docker on Windows runner..."
+                $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
+                if (-not $isAdmin) {
+                  Write-Host "Runner is NOT running with Administrator privileges; cannot install Docker. Set INSTALL_DOCKER to false or run the runner as admin."; exit 1
+                }
+                # Try to install Docker Desktop using Chocolatey (if available)
+                if (Get-Command choco -ErrorAction SilentlyContinue) {
+                  choco install docker-desktop --pre -y
+                } else {
+                  Write-Host "choco not found: attempting to install using PackageManagement (DockerMsftProvider) for Windows Server"
+                  Install-Module -Name DockerMsftProvider -Repository PSGallery -Force
+                  Install-Package -Name docker -ProviderName DockerMsftProvider -Force
+                }
+                # Start Docker
+                if (Get-Command "C:\Program Files\Docker\Docker\Docker Desktop.exe" -ErrorAction SilentlyContinue) {
+                  Start-Process "C:\Program Files\Docker\Docker\Docker Desktop.exe" -NoNewWindow -ErrorAction SilentlyContinue
+                  Start-Sleep -Seconds 10
+                }
       # - name: Checkout code
       #   uses: actions/checkout@v3
       - name: Download docker-artifact
