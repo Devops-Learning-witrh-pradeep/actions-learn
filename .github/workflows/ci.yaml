@@ -10,6 +10,9 @@ on:
 jobs:
   build-test:
     runs-on: self-hosted
+    default: 
+      run: 
+        working_directory: ${{ github.workspace }}
     name: Build & Test and Prepare Artifacts
     steps:
       - name: Checkout code
@@ -30,16 +33,7 @@ jobs:
         run: npm run build
 
       - name: Prepare docker-artifact (production runtime)
-        run: |
-          mkdir -p docker-artifact
-          # Ensure production modules only (remove dev deps and reinstall)
-          rm -rf node_modules
-          npm ci --omit=dev
-          npm run build
-          # Copy needed runtime files into docker-artifact
-          cp -r server.js package*.json package-lock.json dist node_modules docker-artifact/
-          # Also include the Dockerfile inside the artifact so the build can use a simple context
-          cp Dockerfile docker-artifact/Dockerfile
+        run: npm run prepare-artifact
 
       - name: Upload website artifact
         uses: actions/upload-artifact@v4
@@ -55,23 +49,36 @@ jobs:
 
   build-image: 
     needs: build-test
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, windows]
     steps: 
       # - name: Checkout code
       #   uses: actions/checkout@v3
-      - name: download Artifacts
+      - name: Download docker-artifact
         uses: actions/download-artifact@v4
-        with: 
+        with:
           name: docker-artifact
+          path: docker-artifact
       - name: Show workspace
-        run: ls -la
-      # - name: Show docker-artifact contents
-      #   run: ls -la docker-artifact
+        run: |
+          echo "Workspace files:"
+          ls -la
+      - name: Show docker-artifact contents
+        run: |
+          echo "docker-artifact contents:"
+          ls -la docker-artifact || Get-ChildItem -Path docker-artifact -Recurse -Force
+      - name: Ensure Dockerfile exists in docker-artifact
+        run: |
+          if (!(Test-Path docker-artifact\Dockerfile)) { Write-Error 'Dockerfile missing inside docker-artifact'; exit 1 }
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build (and optionally push) Docker image
-        run: docker build -t app:latest .
+      - name: Check Docker version
+        run: docker --version
+
+      - name: Build Docker image from docker-artifact
+        run: |
+          echo "Building image from docker-artifact/Dockerfile..."
+          docker build -f docker-artifact/Dockerfile -t app:latest docker-artifact
 
       - name: Show Docker images
         run: docker images

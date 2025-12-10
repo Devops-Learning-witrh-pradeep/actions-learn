@@ -8,6 +8,7 @@
     "dev": "nodemon server.js",
     "test": "jest --runInBand",
     "build": "node build.js",
+    "prepare-artifact": "node prepare-artifact.js",
     "predeploy": "npm run build"
   },
   "keywords": [],
