@@ -15,8 +15,12 @@ on:
 jobs:
   build-test:
     runs-on: self-hosted
-    defaults: 
-      run: 
+    env:
+      REPOSITORY: ${{ github.repository }}
+      REPOSITORY_OWNER: ${{ github.repository_owner }}
+      REPOSITORY_NAME: ${{ github.event.repository.name }}
+    defaults:
+      run:
         working-directory: ${{ github.workspace }}
     name: Build & Test and Prepare Artifacts
     steps:
@@ -72,7 +76,7 @@ jobs:
           echo "Actor: ${{ github.actor }}"
           echo "Workflow: ${{ github.workflow }}"
           echo "Run number: ${{ github.run_number }}"
-          echo "MY_NAME (env var): $MY_NAME"
+          echo "MY_NAME (env var): ${{ vars.MY_NAME}}"
         
       
 
