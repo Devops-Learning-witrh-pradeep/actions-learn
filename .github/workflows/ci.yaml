@@ -61,11 +61,16 @@ jobs:
       - name: Show workspace
         run: |
           echo "Workspace files:"
-          dir
+            # PowerShell friendly listing
+            Get-ChildItem -Force
       - name: Show docker-artifact contents
         run: |
           echo "docker-artifact contents:"
-          ls -la docker-artifact || Get-ChildItem -Path docker-artifact -Recurse -Force
+            if (Test-Path -Path "docker-artifact") {
+              Get-ChildItem -Path docker-artifact -Recurse -Force | Select-Object FullName, Length
+            } else {
+              Write-Host "docker-artifact not found in workspace"
+            }
       - name: Ensure Dockerfile exists in docker-artifact
         run: |
           if (!(Test-Path docker-artifact\Dockerfile)) { Write-Error 'Dockerfile missing inside docker-artifact'; exit 1 }
