@@ -8,6 +8,9 @@ on:
         default: 'false'
         type: boolean
 
+env: 
+  NAME: workflow
+
 jobs: 
   Build: 
     runs-on: ubuntu-latest
