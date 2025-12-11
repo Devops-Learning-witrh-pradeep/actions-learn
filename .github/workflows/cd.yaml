@@ -28,6 +28,7 @@ jobs:
 
   env-varaibles: 
     runs-on: windows-latest
+    environment: dev
     env: 
       NAME: jobs
     steps: 
