@@ -4,6 +4,7 @@ jobs:
   function: 
     runs-on: ubuntu-latest
     steps: 
+      - run: sleep 20
       - name: failing step
         run: exit 1
       - name: i will be skipped
