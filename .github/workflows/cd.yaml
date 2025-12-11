@@ -16,4 +16,15 @@ jobs:
       if: inputs.DEBUG
       run: |
         echo "trigger by ${{ github.event_name }}"
+
+  env-varaibles: 
+    runs-on: windows-latest
+    env: 
+      NAME: jobs
+    steps: 
+     - name: printing the local env varaibles
+       run: |
+         echo "My name is @{{ env.NAME }}"
+       env: 
+          NAME: steps
     
