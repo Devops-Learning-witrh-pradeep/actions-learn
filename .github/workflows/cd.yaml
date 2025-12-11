@@ -21,6 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps: 
     - name: print github context
+    
       if: inputs.DEBUG
       run: |
         echo "trigger by ${{ github.event_name }}"
@@ -35,4 +36,9 @@ jobs:
          echo "My name is ${{ env.NAME }}"
        env: 
           NAME: ${{ inputs.NAME }}
+     - name: priiting the varaibles
+       run: |
+         echo "ORG varaibles ${{ vars.ORG_VAR }}"
+         echo "Repo var is ${{ vars.REPO_VAR }}"
+         echo "env varaible si ${{ vars.DEV_VAR }}"
     
