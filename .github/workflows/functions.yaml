@@ -1,0 +1,20 @@
+name: functions
+on: push
+jobs: 
+  function: 
+    runs-on: ubuntu-latest
+    steps: 
+      - name: failing step
+        run: exit 1
+      - name: i will be skipped
+        if: ${{ success() }}
+        run: echo "i will print if previous step succeeds" 
+      - name: i will execute
+        if: ${{ failure() }}
+        run: echo "I will exedcute f the previous step fails"
+      - name: i will execite when cancelled
+        if: ${{ cancelled() }}
+        run: echo "I will execute when cancelled"
+      - name: i will execite
+        if: ${{ !cancelled() }}
+        run: echo "I will execute always , except the workfloe is cancelled"
