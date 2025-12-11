@@ -1,6 +1,5 @@
 name: testing the workflow
 on: 
-  push:
   workflow_dispatch: 
     inputs: 
       DEBUG: 
@@ -9,8 +8,13 @@ on:
         default: 'false'
         type: boolean
 
+      NAME: 
+        description: Enter your name
+        type: string
+        default: 'pradeep'
+
 env: 
-  NAME: workflow
+  NAME: ${{ github.workflow }}
 
 jobs: 
   Build: 
@@ -30,5 +34,5 @@ jobs:
        run: |
          echo "My name is ${{ env.NAME }}"
        env: 
-          NAME: steps
+          NAME: ${{ inputs.NAME }}
     
