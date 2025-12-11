@@ -1,5 +1,6 @@
 name: testing the workflow
 on: 
+  push:
   workflow_dispatch: 
     inputs: 
       DEBUG: 
@@ -27,7 +28,7 @@ jobs:
     steps: 
      - name: printing the local env varaibles
        run: |
-         echo "My name is @{{ env.NAME }}"
+         echo "My name is ${{ env.NAME }}"
        env: 
           NAME: steps
     
